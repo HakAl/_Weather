@@ -1,7 +1,3 @@
-// GiftCards Android App
-//
-// Copyright (c) 2007-2015 GiftCards.com.  All rights reserved.
-
 package com.jacmobile.weather.view;
 
 import android.content.Context;
