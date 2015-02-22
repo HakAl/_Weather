@@ -11,4 +11,5 @@ public class NetworkConfig {
     public static final String URL_WEATHER_BY_CITY = "http://api.openweathermap.org/data/2.5/weather?q=%s";
 
     public static final String URL_WEATHER_LAT_LONG = "http://api.openweathermap.org/data/2.5/weather?lat=%1$s&lon=%2$s";
+    public static final String URL_WEATHER_LAT_LONG_PREFIX = "http://api.openweathermap.org/data/2.5/weather?lat=";
 }

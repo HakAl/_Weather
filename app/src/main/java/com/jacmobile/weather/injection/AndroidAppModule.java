@@ -9,8 +9,10 @@ import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.jacmobile.weather.activities.MainActivity;
+import com.jacmobile.weather.events.CurrentWeather;
 import com.jacmobile.weather.network.NetworkProvider;
 import com.jacmobile.weather.network.NetworkService;
+import com.jacmobile.weather.network.gson.deserializers.CurrentWeatherDeserializer;
 import com.squareup.otto.Bus;
 import com.squareup.otto.ThreadEnforcer;
 
@@ -44,37 +46,34 @@ public class AndroidAppModule {
         return (LocationManager) sApplicationContext.getSystemService(Context.LOCATION_SERVICE);
     }
 
-    @Provides
-    @Singleton LayoutInflater provideLayoutInflater() {
-        return LayoutInflater.from(sApplicationContext);
-    }
-
-    @Provides
-    @Singleton Bus provideBus() {
+    @Provides @Singleton Bus provideBus()
+    {
         return new Bus(ThreadEnforcer.ANY);
     }
 
-    @Provides
-    @Singleton RequestQueue provideRequestQueue() {
-        return Volley.newRequestQueue(sApplicationContext);
-    }
-
-    @Provides
-    @Singleton NetworkService provideNetworkService(RequestQueue requestQueue, Bus bus, Gson gson) {
-        return new NetworkService(new NetworkProvider(requestQueue), bus, gson);
-    }
-
-
-    @Provides
-    @Singleton Gson providesGson() {
+    @Provides @Singleton Gson providesGson() {
         GsonBuilder builder = new GsonBuilder();
 
         //Deserializers
-//        builder.registerTypeAdapter(LoginData.class, new LoginDataDeserializer());
+        builder.registerTypeAdapter(CurrentWeather.class, new CurrentWeatherDeserializer());
 
         //Serializers
 //        builder.registerTypeAdapter(Shipping.class, new ShippingSerializer());
 
         return builder.create();
+    }
+
+    @Provides @Singleton RequestQueue provideRequestQueue() {
+        return Volley.newRequestQueue(sApplicationContext);
+    }
+
+    @Provides @Singleton NetworkProvider provideNetwork(RequestQueue requestQueue)
+    {
+        return new NetworkProvider(requestQueue);
+    }
+
+    @Provides @Singleton NetworkService provideNetworkService(NetworkProvider networkProvider, Bus bus, Gson gson)
+    {
+        return new NetworkService(networkProvider, bus, gson);
     }
 }

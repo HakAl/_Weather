@@ -1,7 +1,11 @@
 package com.jacmobile.weather.activities;
 
 import android.app.Activity;
-import android.support.v7.app.ActionBarActivity;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -13,13 +17,20 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
+import android.widget.Toast;
 
-import com.google.common.eventbus.Subscribe;
 import com.jacmobile.weather.events.AEvent;
-import com.jacmobile.weather.events.NetworkError;
-import com.jacmobile.weather.events.NetworkEvent;
+import com.jacmobile.weather.events.CurrentWeather;
+import com.jacmobile.weather.events.NetworkResponse;
 import com.jacmobile.weather.fragments.NavigationDrawerFragment;
+import com.jacmobile.weather.network.NetworkConfig;
+import com.jacmobile.weather.network.NetworkService;
 import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -27,6 +38,8 @@ import jacmobile.com.weather.R;
 
 public class MainActivity extends AActivity implements NavigationDrawerFragment.NavigationDrawerCallbacks {
     @Inject Bus bus;
+    @Inject LocationManager locationManager;
+    @Inject NetworkService networkService;
 
     private CharSequence mTitle;
     private NavigationDrawerFragment mNavigationDrawerFragment;
@@ -57,6 +70,78 @@ public class MainActivity extends AActivity implements NavigationDrawerFragment.
     @Override protected void onStart() {
         super.onStart();
         this.bus.register(this);
+
+        Location lastLocation = getLastBestLocation();
+
+        networkService.get(String.format(NetworkConfig.URL_WEATHER_LAT_LONG,
+                lastLocation.getLatitude()+"", lastLocation.getLongitude()+""));
+
+    }/**
+     * @return the last know best location
+     */
+    private Location getLastBestLocation() {
+        Location locationGPS = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        Location locationNet = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+
+        long GPSLocationTime = 0;
+        if (null != locationGPS) { GPSLocationTime = locationGPS.getTime(); }
+
+        long NetLocationTime = 0;
+
+        if (null != locationNet) {
+            NetLocationTime = locationNet.getTime();
+        }
+
+        if ( 0 < GPSLocationTime - NetLocationTime ) {
+            return locationGPS;
+        }
+        else {
+            return locationNet;
+        }
+    }
+
+
+    /*---------- Listener class to get coordinates ------------- */
+    private class MyLocationListener implements LocationListener {
+
+        @Override
+        public void onLocationChanged(Location loc) {
+            Toast.makeText(
+                    getBaseContext(),
+                    "Location changed: Lat: " + loc.getLatitude() + " Lng: "
+                            + loc.getLongitude(), Toast.LENGTH_SHORT).show();
+            String longitude = "Longitude: " + loc.getLongitude();
+            Log.v("longitude", longitude);
+            String latitude = "Latitude: " + loc.getLatitude();
+            Log.v("latitude", latitude);
+
+        /*------- To get city name from coordinates -------- */
+            String cityName = null;
+            Geocoder gcd = new Geocoder(getBaseContext(), Locale.getDefault());
+            List<Address> addresses;
+            try {
+                addresses = gcd.getFromLocation(loc.getLatitude(),
+                        loc.getLongitude(), 1);
+                if (addresses.size() > 0)
+                    System.out.println(addresses.get(0).getLocality());
+                cityName = addresses.get(0).getLocality();
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
+            String s = longitude + "\n" + latitude + "\n\nMy Current City is: "
+                    + cityName;
+            Log.wtf("Location Recieved", s);
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {}
+
+        @Override
+        public void onProviderEnabled(String provider) {}
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {}
     }
 
     @Override protected void onStop() {
@@ -65,17 +150,19 @@ public class MainActivity extends AActivity implements NavigationDrawerFragment.
     }
 
     @Subscribe public void busEvent(AEvent event) {
-        if (event instanceof NetworkEvent) {
-        }
+        if (event instanceof NetworkResponse) {
+            if (((NetworkResponse) event).getError() != null) {
 
-        if (event instanceof NetworkError) {
-            Log.e("Network Exception", ((NetworkError) event).getError().toString());
+            } else {
+                if (event instanceof CurrentWeather) {
+                    Toast.makeText(this, "CurrentWeather recieved", Toast.LENGTH_LONG).show();
+                }
+            }
         }
     }
 
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    @Override public boolean onCreateOptionsMenu(Menu menu) {
         if (!mNavigationDrawerFragment.isDrawerOpen()) {
             // Only show items in the action bar relevant to this screen
             // if the drawer is not showing. Otherwise, let the drawer
@@ -87,8 +174,7 @@ public class MainActivity extends AActivity implements NavigationDrawerFragment.
         return super.onCreateOptionsMenu(menu);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    @Override public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
@@ -123,20 +209,9 @@ public class MainActivity extends AActivity implements NavigationDrawerFragment.
         actionBar.setTitle(mTitle);
     }
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
     public static class PlaceholderFragment extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
         private static final String ARG_SECTION_NUMBER = "section_number";
 
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
         public static PlaceholderFragment newInstance(int sectionNumber) {
             PlaceholderFragment fragment = new PlaceholderFragment();
             Bundle args = new Bundle();
@@ -145,22 +220,15 @@ public class MainActivity extends AActivity implements NavigationDrawerFragment.
             return fragment;
         }
 
-        public PlaceholderFragment() {
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+        @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
             return rootView;
         }
 
-        @Override
-        public void onAttach(Activity activity) {
+        @Override public void onAttach(Activity activity) {
             super.onAttach(activity);
-            ((MainActivity) activity).onSectionAttached(
-                    getArguments().getInt(ARG_SECTION_NUMBER));
+            ((MainActivity) activity).onSectionAttached(getArguments().getInt(ARG_SECTION_NUMBER));
         }
     }
-
 }

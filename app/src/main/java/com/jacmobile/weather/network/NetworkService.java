@@ -9,11 +9,11 @@ import android.util.Log;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.google.gson.Gson;
+import com.jacmobile.weather.events.CurrentWeather;
+import com.jacmobile.weather.events.NetworkResponse;
 import com.squareup.otto.Bus;
 
 import com.jacmobile.weather.events.AEvent;
-import com.jacmobile.weather.events.NetworkError;
-import com.jacmobile.weather.events.NetworkEvent;
 import com.jacmobile.weather.network.requests.GsonRequest;
 
 import static com.android.volley.Request.Method.GET;
@@ -31,8 +31,9 @@ public class NetworkService<T> implements NetworkProvider.NetworkService {
     }
 
     @Override public void get(String id) {
-        switch (id) {
-//            case WEATHER_INFO_URL: GsonRequest(id, null, WeatherInfo.class); break;
+        Log.wtf("get", id);
+        if (id.startsWith(NetworkConfig.URL_WEATHER_LAT_LONG_PREFIX)) {
+            GsonRequest(id, null, CurrentWeather.class);
         }
     }
 
@@ -44,6 +45,8 @@ public class NetworkService<T> implements NetworkProvider.NetworkService {
 
     private void bus(AEvent response) {
         bus.register(this);
+        Log.wtf("success", ((CurrentWeather)response).getCity());
+
         bus.post(response);
         bus.unregister(this);
     }
@@ -65,7 +68,7 @@ public class NetworkService<T> implements NetworkProvider.NetworkService {
     private Response.Listener<T> success() {
         return new Response.Listener<T>() {
             @Override public void onResponse(T response) {
-                bus((NetworkEvent) response);
+                bus((NetworkResponse) response);
             }
         };
     }
@@ -73,7 +76,11 @@ public class NetworkService<T> implements NetworkProvider.NetworkService {
     private Response.ErrorListener error(final String requestId) {
         return new Response.ErrorListener() {
             @Override public void onErrorResponse(VolleyError volleyError) {
-                bus(new NetworkError(requestId, volleyError));
+
+                Log.wtf("Adding error", "URL: " + requestId);
+                Log.wtf("Adding error", volleyError.toString());
+
+                bus(new NetworkResponse(requestId, volleyError));
             }
         };
     }
