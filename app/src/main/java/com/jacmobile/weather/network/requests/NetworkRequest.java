@@ -1,10 +1,3 @@
-//
-// NetworkRequest.java
-// GiftCards Android
-//
-// Created by Alex Corll on 1/22/2015
-// Copyright (c) 2007-2015 GiftCards.com.  All rights reserved.
-//
 package com.jacmobile.weather.network.requests;
 
 import com.android.volley.DefaultRetryPolicy;
