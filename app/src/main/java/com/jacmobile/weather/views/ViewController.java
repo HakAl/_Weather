@@ -1,4 +1,4 @@
-package com.jacmobile.weather.view;
+package com.jacmobile.weather.views;
 
 import android.content.res.Resources;
 import android.view.View;
@@ -7,14 +7,16 @@ import com.jacmobile.weather.activities.MainActivity;
 import com.jacmobile.weather.events.Update;
 
 public abstract class ViewController implements View.OnClickListener {
-    private View root;
-    private Update update;
+    protected View root;
+    protected Update update;
 
     public abstract Update provideUpdate();
 
     public abstract void onCreateView(View root);
 
     public abstract void onResume();
+
+    public abstract void onStop();
 
     protected MainActivity context() {
         return (MainActivity) root.getContext();

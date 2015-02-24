@@ -1,4 +1,4 @@
-package com.jacmobile.weather.view;
+package com.jacmobile.weather.views;
 
 import android.animation.ObjectAnimator;
 import android.content.Context;
@@ -13,7 +13,6 @@ import android.widget.RelativeLayout;
 
 import jacmobile.com.weather.R;
 
-/** Used to add a shadow below the Toolbar on the main content frame. **/
 public class DrawShadowFrameLayout extends RelativeLayout
 {
     private Drawable mShadowDrawable;

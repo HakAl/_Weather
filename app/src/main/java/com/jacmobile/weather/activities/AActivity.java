@@ -12,11 +12,10 @@ public abstract class AActivity extends ActionBarActivity implements DaggerInjec
     private ObjectGraph mActivityGraph;
 
     @Override protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
         DaggerApplication application = (DaggerApplication) getApplication();
         mActivityGraph = application.getObjectGraph().plus(geActivitytModules());
         mActivityGraph.inject(this);
+        super.onCreate(savedInstanceState);
     }
 
     @Override protected void onDestroy() {

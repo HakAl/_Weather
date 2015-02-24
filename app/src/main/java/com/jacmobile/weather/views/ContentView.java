@@ -1,4 +1,4 @@
-package com.jacmobile.weather.view;
+package com.jacmobile.weather.views;
 
 import android.view.ViewGroup;
 import com.jacmobile.weather.activities.AActivity;
@@ -8,7 +8,7 @@ public interface ContentView {
     /** The root {@link android.view.ViewGroup} into which the activity should place its contents. **/
     ViewGroup get(AActivity activity);
 
-    /** An {@link com.jacmobile.weather.view.ContentView} which returns the normal activity content view. **/
+    /** An {@link com.jacmobile.weather.views.ContentView} which returns the normal activity content view. **/
     ContentView DEFAULT = new ContentView() {
         @Override public ViewGroup get(AActivity activity) {
             return (ViewGroup) activity.findViewById(android.R.id.content);

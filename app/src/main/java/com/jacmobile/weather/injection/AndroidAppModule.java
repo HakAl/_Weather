@@ -2,6 +2,8 @@ package com.jacmobile.weather.injection;
 
 import android.content.Context;
 import android.location.LocationManager;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 
 import com.android.volley.RequestQueue;
@@ -10,6 +12,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.jacmobile.weather.activities.MainActivity;
 import com.jacmobile.weather.events.CurrentWeather;
+import com.jacmobile.weather.fragments.WeatherFragment;
 import com.jacmobile.weather.network.NetworkProvider;
 import com.jacmobile.weather.network.NetworkService;
 import com.jacmobile.weather.network.gson.deserializers.CurrentWeatherDeserializer;
@@ -26,6 +29,7 @@ import dagger.Provides;
         library = true,
         injects = {
                 MainActivity.class,
+                WeatherFragment.class
         }
 )
 public class AndroidAppModule {
@@ -44,6 +48,11 @@ public class AndroidAppModule {
     @Provides
     @Singleton LocationManager provideLocationManager() {
         return (LocationManager) sApplicationContext.getSystemService(Context.LOCATION_SERVICE);
+    }
+
+    @Provides @Singleton Handler provideHandler()
+    {
+        return new Handler(Looper.getMainLooper());
     }
 
     @Provides @Singleton Bus provideBus()

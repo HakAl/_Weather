@@ -1,4 +1,4 @@
-package com.jacmobile.weather.view;
+package com.jacmobile.weather.views;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -6,27 +6,28 @@ import android.view.MotionEvent;
 
 public class LockedVerticalViewPager extends VerticalViewPager
 {
-    private boolean isSwipeEnabled;
+    private boolean locked;
+    LockableLayoutListener listener;
 
     public LockedVerticalViewPager(Context context, AttributeSet attrs)
     {
         super(context, attrs);
-        this.isSwipeEnabled = false;
+        this.locked = false;
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event)
+    @Override public boolean onTouchEvent(MotionEvent event)
     {
-        return this.isSwipeEnabled && super.onTouchEvent(event);
+        return this.locked && super.onTouchEvent(event);
     }
 
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent event)
+    @Override public boolean onInterceptTouchEvent(MotionEvent ev)
     {
-        if (this.isSwipeEnabled) {
-            return super.onInterceptTouchEvent(event);
-        }
-        return false;
+        return this.listener.isLocked();
+    }
+
+    public void setListener(LockableLayoutListener listener)
+    {
+        this.listener = listener;
     }
 
     public int back()
@@ -47,21 +48,18 @@ public class LockedVerticalViewPager extends VerticalViewPager
         return currentIndex;
     }
 
-    /**
-     * Enable or disable swipe
-     *
-     * @param isSwipeEnabled true to enable swipe, false otherwise
-     */
-    public void setPagingEnabled(boolean isSwipeEnabled)
+    public void lock(boolean isSwipeEnabled)
     {
-        this.isSwipeEnabled = isSwipeEnabled;
+        this.locked = isSwipeEnabled;
     }
 
-    /**
-     * Flip on or off.
-     */
-    public void toggle()
+    public void toggleLock()
     {
-        this.isSwipeEnabled = !isSwipeEnabled;
+        this.locked = !locked;
+    }
+
+    public interface LockableLayoutListener
+    {
+        public boolean isLocked();
     }
 }

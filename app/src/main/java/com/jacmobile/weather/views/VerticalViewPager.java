@@ -1,4 +1,4 @@
-package com.jacmobile.weather.view;
+package com.jacmobile.weather.views;
 
 import android.content.Context;
 import android.content.res.Resources;

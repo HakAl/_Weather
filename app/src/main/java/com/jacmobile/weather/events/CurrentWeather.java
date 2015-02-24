@@ -1,6 +1,24 @@
 package com.jacmobile.weather.events;
 
 public class CurrentWeather extends NetworkResponse {
+    public String getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(String latitude) {
+        this.latitude = latitude;
+    }
+
+    public String getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(String longitude) {
+        this.longitude = longitude;
+    }
+
+    private String latitude;
+    private String longitude;
     private String city;
     private String primaryDescription;
     private String secondaryDescription;
@@ -12,11 +30,20 @@ public class CurrentWeather extends NetworkResponse {
     private String pressure;
     private String seaLevel;
     private String groundLevel;
+    private String imageId;
 
     public CurrentWeather() { }
 
     public CurrentWeather(String data) {
         this.data = data;
+    }
+
+    public String getImageId() {
+        return imageId;
+    }
+
+    public void setImageId(String imageId) {
+        this.imageId = imageId;
     }
 
     public String getWindDegrees() {

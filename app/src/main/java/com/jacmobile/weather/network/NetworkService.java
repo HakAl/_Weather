@@ -45,8 +45,6 @@ public class NetworkService<T> implements NetworkProvider.NetworkService {
 
     private void bus(AEvent response) {
         bus.register(this);
-        Log.wtf("success", ((CurrentWeather)response).getCity());
-
         bus.post(response);
         bus.unregister(this);
     }

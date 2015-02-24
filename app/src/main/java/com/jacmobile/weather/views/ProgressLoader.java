@@ -1,4 +1,4 @@
-package com.jacmobile.weather.view;
+package com.jacmobile.weather.views;
 
 import android.app.FragmentManager;
 import android.graphics.drawable.Drawable;
@@ -23,11 +23,10 @@ import jacmobile.com.weather.R;
 
 @Singleton public class ProgressLoader
 {
-    private static final String TAG = "progress";
-
     public static final int SHORT_DURATION = 1666;
     public static final int MED_DURATION = 2500;
     public static final int LONG_DURATION = 5000;
+    private static final String TAG = "progress";
 
     @Inject Handler handler;
 
@@ -40,17 +39,24 @@ import jacmobile.com.weather.R;
         temp.show(fm, TAG);
     }
 
-    public void hideProgress()
-    {
-        if (temp != null) temp.dismiss();
-    }
-
-    public void transientProgress(FragmentManager fm, final int duration)
+    public void showProgress(FragmentManager fm, final int duration)
     {
         temp = LoadingFragment.newInstance();
         temp.setCancelable(false);
         temp.show(fm, TAG);
         handler.postDelayed(getProgressRunnable(), duration);
+    }
+
+    public void hideProgress()
+{
+    if (temp != null) temp.dismiss();
+}
+
+    public void showProgress(FragmentManager fm, String description)
+    {
+        temp = LoadingFragment.newInstance(description);
+        temp.setCancelable(false);
+        temp.show(fm, TAG);
     }
 
     public Runnable getProgressRunnable()
@@ -63,13 +69,6 @@ import jacmobile.com.weather.R;
                 hideProgress();
             }
         };
-    }
-
-    public void showProgress(FragmentManager fm, String description)
-    {
-        temp = LoadingFragment.newInstance(description);
-        temp.setCancelable(false);
-        temp.show(fm, TAG);
     }
 
 //  Use this to close progress when image(s) finish loading
@@ -116,9 +115,7 @@ import jacmobile.com.weather.R;
             View view = LayoutInflater.from(getActivity()).inflate(
                     R.layout.loading_progress, new LinearLayout(getActivity()), false);
             dialog.setTitle(null);
-            dialog.setContentView(view);
 
-            //adjust if more args are added
             if (getArguments() != null) {
                 ((TextView) view.findViewById(R.id.txt_progress))
                         .setText(getArguments().getString(TITLE));
